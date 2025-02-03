@@ -55,7 +55,7 @@ jobs:
 
       - name: Run load_test.py
         run: |
-          pytest load_test.py  # Runs tests that require backend/frontend
+          python load_test.py  # Runs tests that require backend/frontend
 
       # Stop all background processes
       - name: Stop backend and frontend
