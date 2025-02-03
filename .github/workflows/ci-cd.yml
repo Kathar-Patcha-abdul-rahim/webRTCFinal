@@ -1,0 +1,80 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up and install dependencies for Flask backend
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: Install backend dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run test_app.py
+        run: |
+          python test_app.py  # Runs normally without pytest
+
+      # Set up and install dependencies for React frontend
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install frontend dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Build frontend
+        run: |
+          cd frontend
+          npm run build
+
+      # Start backend and frontend servers in the background for load_test.py
+      - name: Start backend and frontend
+        run: |
+          python app.py &  # Start Flask backend
+          cd frontend && npm start &  # Start React frontend
+          sleep 10  # Wait for servers to be fully up
+
+      - name: Run load_test.py
+        run: |
+          pytest load_test.py  # Runs tests that require backend/frontend
+
+      # Stop all background processes
+      - name: Stop backend and frontend
+        if: always()
+        run: |
+          pkill -f "python app.py" || true
+          pkill -f "npm start" || true
+
+  deploy:
+    needs: build-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy backend
+        run: |
+          echo "Deploying Flask backend..."
+          # Add deployment commands (e.g., AWS, DigitalOcean, Render)
+
+      - name: Deploy frontend
+        run: |
+          echo "Deploying React frontend..."
+          # Add commands for React deployment (e.g., Vercel, Netlify)
