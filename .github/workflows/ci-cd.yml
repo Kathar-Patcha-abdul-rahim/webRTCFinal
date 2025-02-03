@@ -28,7 +28,7 @@ jobs:
 
       - name: Run test_app.py
         run: |
-          python test_app.py  # Runs normally without pytest
+          pytest test_app.py  
 
       # Set up and install dependencies for React frontend
       - name: Set up Node.js
