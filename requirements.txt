@@ -4,3 +4,4 @@ eventlet
 flask-cors
 pytest
 requests
+websocket-client
