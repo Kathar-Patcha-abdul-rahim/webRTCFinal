@@ -53,6 +53,11 @@ jobs:
           cd frontend && npm start &  # Start React frontend
           sleep 10  # Wait for servers to be fully up
 
+      - name: Wait for backend and frontend to start
+        run: |
+          curl --retry 5 --retry-delay 5 --fail http://127.0.0.1:5000 || exit 1
+          curl --retry 5 --retry-delay 5 --fail http://127.0.0.1:3000 || exit 1
+
       - name: Run load_test.py
         run: |
           python load_test.py  # Runs tests that require backend/frontend
