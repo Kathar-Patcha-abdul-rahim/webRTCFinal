@@ -5,3 +5,5 @@ flask-cors
 pytest
 requests
 websocket-client
+selenium
+Appium-Python-Client

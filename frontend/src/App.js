@@ -2,7 +2,15 @@ import React, { useRef, useState, useEffect } from "react";
 import io from "socket.io-client";
 import './App.css'
 
-const socket = io("http://localhost:5000"); // Connect to Flask WebSocket server
+const getSocketURL = () => {
+    if (window.location.hostname === "localhost") {
+        return "http://localhost:5000"; // Windows
+    } else {
+        return "http://10.0.2.2:5000"; // Android Emulator
+    }
+};
+
+const socket = io(getSocketURL());
 
 const App = () => {
     const localVideoRef = useRef(null);
@@ -10,6 +18,7 @@ const App = () => {
     const peerConnectionRef = useRef(null);
     const [userId, setUserId] = useState(null);
     const [partnerId, setPartnerId] = useState("");
+    const [isCallActive, setIsCallActive] = useState(false);
 
     useEffect(() => {
         socket.on("connect", () => {
@@ -47,6 +56,7 @@ const App = () => {
     }, []);
 
     const startCall = async () => {
+        setIsCallActive(true);
         peerConnectionRef.current = createPeerConnection(partnerId);
 
         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -63,7 +73,9 @@ const App = () => {
 
     const createPeerConnection = (partnerId) => {
         const pc = new RTCPeerConnection({
-            iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+            iceServers: [
+                { urls: "stun:stun.l.google.com:19302" },  // Only STUN server
+            ],
         });
 
         pc.onicecandidate = (event) => {
@@ -94,7 +106,7 @@ const App = () => {
                     value={partnerId}
                     onChange={(e) => setPartnerId(e.target.value)}
                 />
-                <button onClick={startCall}>Start Call</button>
+                <button onClick={startCall} disabled={isCallActive}>Start Call</button>
             </div>
             <div style={{ display: "flex" }}>
                 <video ref={localVideoRef} autoPlay playsInline muted style={{ width: "45%", margin: "5px" }} />
